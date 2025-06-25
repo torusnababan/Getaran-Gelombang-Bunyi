@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kuis IPA SMP Getaran Gelombang dan Bunyi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    .question {
+      margin-bottom: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    input[type="text"] {
+      width: 300px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    #timer {
+      font-weight: bold;
+      color: red;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Kuis IPA SMP</h2>
+  <h2>By: Torus Manuntun Nababan, M.Pd</h2>
+  <h2>Materi: Getaran Gelombang dan Bunyi</h2>
+  <!-- Form Identitas -->
+  <div id="identityForm">
+    <h3>Silakan isi identitas terlebih dahulu:</h3>
+    <label>Nama:
+      <input type="text" id="nama" required>
+    </label>
+    <label>Kelas:
+      <input type="text" id="kelas" required>
+    </label>
+    <label>Tahun Ajaran:
+      <input type="text" id="tahun" required>
+    </label>
+    <label>Nama Sekolah:
+      <input type="text" id="sekolah" required>
+    </label>
+    <button onclick="startQuiz()">Mulai Kuis</button>
+  </div>
+
+  <!-- Timer -->
+  <div id="timer" class="hidden"></div>
+
+  <!-- Form Soal -->
+  <form id="quizForm" class="hidden">
+    <div id="questionsContainer"></div>
+    <button type="button" onclick="submitQuiz()">Selesai dan Lihat Skor</button>
+  </form>
+
+  <div id="result" class="hidden"></div>
+
+  <script>
+    const questions = [
+      { question: "1. Getaran adalah...", options: ["Perpindahan benda dari satu tempat ke tempat lain", "Gerakan bolak-balik secara teratur", "Perubahan energi menjadi suara", "Panjang gelombang dalam satuan detik"], answer: "Gerakan bolak-balik secara teratur" },
+    { question: "2. Satuan frekuensi adalah...", options: ["Meter", "Detik", "Hertz", "Newton"], answer: "Hertz" },
+    { question: "3. Jumlah getaran dalam satu detik disebut...", options: ["Frekuensi", "Amplitudo", "Periode", "Gelombang"], answer: "Frekuensi" },
+    { question: "4. Gelombang transversal memiliki arah getar...", options: ["Sejajar arah rambat", "Berlawanan arah rambat", "Tegak lurus arah rambat", "Melingkar"], answer: "Tegak lurus arah rambat" },
+    { question: "5. Contoh gelombang transversal adalah...", options: ["Bunyi", "Gelombang air", "Gelombang tali", "Gelombang cahaya"], answer: "Gelombang cahaya" },
+    { question: "6. Gelombang longitudinal merambat dengan arah getar...", options: ["Tegak lurus arah rambat", "Melingkar", "Sejajar arah rambat", "Acak"], answer: "Sejajar arah rambat" },
+    { question: "7. Contoh gelombang longitudinal adalah...", options: ["Gelombang air", "Gelombang bunyi", "Gelombang cahaya", "Gelombang mikro"], answer: "Gelombang bunyi" },
+    { question: "8. Gelombang bunyi tidak dapat merambat melalui...", options: ["Udara", "Air", "Logam", "Ruang hampa"], answer: "Ruang hampa" },
+    { question: "9. Bunyi pantul yang terdengar kembali disebut...", options: ["Resonansi", "Gema", "Gaung", "Frekuensi"], answer: "Gema" },
+    { question: "10. Bunyi yang terdengar samar karena pantulannya berdekatan disebut...", options: ["Gema", "Gaung", "Suara asli", "Resonansi"], answer: "Gaung" },
+    { question: "11. Alat untuk mengukur frekuensi bunyi adalah...", options: ["Stopwatch", "Oscilloscope", "Mikrometer", "Termometer"], answer: "Oscilloscope" },
+    { question: "12. Semakin besar frekuensi suatu bunyi, maka bunyinya semakin...", options: ["Pelan", "Lemah", "Kuat", "Tinggi"], answer: "Tinggi" },
+    { question: "13. Semakin besar amplitudo bunyi, maka bunyinya semakin...", options: ["Kecil", "Tinggi", "Kuat", "Lemah"], answer: "Kuat" },
+    { question: "14. Alat musik seperti gitar menghasilkan bunyi melalui...", options: ["Getaran udara", "Getaran senar", "Pantulan bunyi", "Gelombang cahaya"], answer: "Getaran senar" },
+    { question: "15. Proses memperkuat bunyi dengan getaran yang sama disebut...", options: ["Gaung", "Gema", "Resonansi", "Interferensi"], answer: "Resonansi" },
+    { question: "16. Contoh pemanfaatan bunyi pantul dalam teknologi adalah...", options: ["Radio", "Sonar", "Lampu", "Kompas"], answer: "Sonar" },
+    { question: "17. Satuan cepat rambat bunyi adalah...", options: ["m/s", "Hz", "dB", "s"], answer: "m/s" },
+    { question: "18. Bunyi termasuk gelombang mekanik karena...", options: ["Dapat merambat di ruang hampa", "Tidak butuh medium", "Butuh medium untuk merambat", "Merupakan gelombang cahaya"], answer: "Butuh medium untuk merambat" },
+    { question: "19. Manusia dapat mendengar bunyi dengan frekuensi antara...", options: ["10 – 100 Hz", "20 – 20.000 Hz", "100 – 10.000 Hz", "1.000 – 100.000 Hz"], answer: "20 – 20.000 Hz" },
+    { question: "20. Gelombang adalah...", options: ["Perubahan frekuensi dalam satu waktu", "Perambatan energi melalui medium", "Gerakan peluru dalam air", "Kumpulan getaran acak"], answer: "Perambatan energi melalui medium" }
+  ];
+
+    let quizTimer;
+    let countdownInterval;
+    const timeLimit = 20 * 60 * 1000; // 20 menit
+
+    function startQuiz() {
+      const nama = document.getElementById('nama').value;
+      const kelas = document.getElementById('kelas').value;
+      const tahun = document.getElementById('tahun').value;
+      const sekolah = document.getElementById('sekolah').value;
+
+      if (!nama || !kelas || !tahun || !sekolah) {
+        alert("Harap lengkapi semua data identitas.");
+        return;
+      }
+
+      document.getElementById('identityForm').classList.add('hidden');
+      document.getElementById('quizForm').classList.remove('hidden');
+      document.getElementById('timer').classList.remove('hidden');
+
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = "";
+      questions.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.classList.add('question');
+        div.innerHTML = `<p>${q.question}</p>` + q.options.map(opt => `
+          <label><input type="radio" name="q${index}" value="${opt}"> ${opt}</label><br>`).join('');
+        container.appendChild(div);
+      });
+
+      // Timer otomatis submit setelah 20 menit
+      quizTimer = setTimeout(() => {
+        alert("Waktu habis! Kuis akan otomatis disubmit.");
+        submitQuiz();
+      }, timeLimit);
+
+      // Countdown display
+      let remaining = timeLimit / 1000;
+      const timerDisplay = document.getElementById('timer');
+      timerDisplay.textContent = `Sisa waktu: ${remaining} detik`;
+      countdownInterval = setInterval(() => {
+        remaining--;
+        timerDisplay.textContent = `Sisa waktu: ${remaining} detik`;
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+    }
+
+    function submitQuiz() {
+      clearTimeout(quizTimer);
+      clearInterval(countdownInterval);
+
+      let score = 0;
+      questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        if (selected && selected.value === q.answer) {
+          score += 10;
+        }
+      });
+
+      document.getElementById('quizForm').classList.add('hidden');
+      document.getElementById('timer').classList.add('hidden');
+      const resultDiv = document.getElementById('result');
+      resultDiv.classList.remove('hidden');
+
+      const nama = document.getElementById('nama').value;
+      const kelas = document.getElementById('kelas').value;
+      const tahun = document.getElementById('tahun').value;
+      const sekolah = document.getElementById('sekolah').value;
+
+      let message = "";
+      if (score >= 70) {
+        message = "<p style='color: green;'><strong>Selamat!</strong> Anda Sudah Bisa Melanjutkan ke Materi Berikutnya.</p>";
+      } else {
+        message = "<p style='color: red;'><strong>Mohon maaf.</strong> Silakan pelajari kembali materi ini sebelum melanjutkan ke materi berikutnya.</p>";
+      }
+
+      resultDiv.innerHTML = `
+        <h3>Hasil Kuis</h3>
+        <p><strong>Nama:</strong> ${nama}</p>
+        <p><strong>Kelas:</strong> ${kelas}</p>
+        <p><strong>Tahun Ajaran:</strong> ${tahun}</p>
+        <p><strong>Sekolah:</strong> ${sekolah}</p>
+        <p><strong>Skor Anda:</strong> ${score} dari 200</p>
+        ${message}
+      `;
+    }
+  </script>
+</body>
+</html>
